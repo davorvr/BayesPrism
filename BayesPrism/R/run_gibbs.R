@@ -248,7 +248,8 @@ run.gibbs.refPhi.ini <- function(gibbsSampler.obj,
 	seed <- gibbs.control$seed
 
 	sample.Z.theta_n <- BayesPrism:::sample.Z.theta_n
-		
+	rdirichlet <- BayesPrism:::rdirichlet
+	
 	cat("Start run... \n")
 	
 	if(gibbs.control$n.cores>1){	
@@ -269,7 +270,7 @@ run.gibbs.refPhi.ini <- function(gibbsSampler.obj,
 		}
 		tmp.dir <- tempdir(check=TRUE)
 		sfExport("phi", "alpha", "gibbs.idx", "seed", 
-				 	"compute.elbo", "sample.Z.theta_n","tmp.dir")
+				 	"compute.elbo", "sample.Z.theta_n","rdirichlet","tmp.dir")
 		environment(cpu.fun) <- globalenv()
 		gibbs.list <- sfLapply( 1:nrow(X), cpu.fun)
 		sfStop()
@@ -315,7 +316,8 @@ run.gibbs.refPhi.final <- function(gibbsSampler.obj,
 	seed <- gibbs.control$seed
 
 	sample.theta_n <- BayesPrism:::sample.theta_n
-		
+	rdirichlet <- BayesPrism:::rdirichlet
+	
 	cat("Start run... \n")
 	
 	if(gibbs.control$n.cores>1){	
@@ -335,7 +337,7 @@ run.gibbs.refPhi.final <- function(gibbsSampler.obj,
 		}
 		tmp.dir <- tempdir(check=TRUE)
 		sfExport("phi", "alpha", "gibbs.idx", "seed", 
-				 "compute.elbo", "sample.theta_n", "tmp.dir")
+				 "compute.elbo", "sample.theta_n","rdirichlet","tmp.dir")
 		environment(cpu.fun) <- globalenv()
 		gibbs.list <- sfLapply( 1:nrow(X), cpu.fun)
 		sfStop() 
@@ -376,7 +378,7 @@ run.gibbs.refTumor <- function(gibbsSampler.obj){
 	seed <- gibbs.control$seed
 	
 	sample.theta_n <- BayesPrism:::sample.theta_n
-	
+	rdirichlet <- BayesPrism:::rdirichlet
 
 	tmp.dir <- tempdir(check=TRUE)
 	for(n in 1:nrow(psi_mal)) {
@@ -406,7 +408,7 @@ run.gibbs.refTumor <- function(gibbsSampler.obj){
 	}
 	sfInit(parallel = TRUE, cpus = gibbs.control$n.cores, type = "SOCK" )
 	tmp.dir <- tempdir(check=TRUE)
-	sfExport("psi_env", "X", "alpha", "gibbs.idx", "seed", "sample.theta_n", "tmp.dir")
+	sfExport("psi_env", "X", "alpha", "gibbs.idx", "seed", "sample.theta_n","rdirichlet","tmp.dir")
 	
 	environment(cpu.fun) <- globalenv()
 	gibbs.list <- sfLapply( 1:nrow(X), cpu.fun)
