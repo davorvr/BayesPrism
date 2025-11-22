@@ -29,6 +29,7 @@ rdirichlet <- function(alpha){
 #' @param alpha a numeric value to denote the symmetric Dirichlet prior 
 #' @param gibbs.idx a numeric vector to denote the index of samples to be retained from MCMC chain
 #' @param compute.elbo a logical variable to denote if compute ELBO. Default=FALSE.
+#' @export
 #' return a list containing the posterior mean of Z_n and theta_n
 sample.Z.theta_n <- function(X_n, 
 				        	 	 phi,
@@ -101,6 +102,7 @@ sample.Z.theta_n <- function(X_n,
 #' @param phi an array of dimension K*G to denote reference matrix of Nth sample
 #' @param alpha a numeric value to denote the symmetric Dirichlet prior 
 #' @param gibbs.idx a numeric vector to denote the index of samples to be retained from MCMC chain 
+#' @export
 #' return a vector containing the posterior mean of theta_n
 sample.theta_n <- function(X_n, 
 				           phi,
@@ -258,6 +260,7 @@ run.gibbs.refPhi.ini <- function(gibbsSampler.obj,
 					
 		cpu.fun <- function(n) {
 			if(!is.null(seed)) set.seed(seed)
+			require("BayesPrism")
 			#load nth mixture from disk
 			file.name.X_n <- paste(tmp.dir, "/mixture_",n,".rdata",sep="")
 			load(file.name.X_n)
@@ -269,8 +272,14 @@ run.gibbs.refPhi.ini <- function(gibbsSampler.obj,
 							  compute.elbo = compute.elbo)		
 		}
 		tmp.dir <- tempdir(check=TRUE)
-		sfExport("phi", "alpha", "gibbs.idx", "seed", 
-				 	"compute.elbo", "sample.Z.theta_n","rdirichlet","tmp.dir")
+#		sfExport("phi", "alpha", "gibbs.idx", "seed", 
+#				 	"compute.elbo", "sample.Z.theta_n","rdirichlet","tmp.dir")
+		
+		environment(sample.Z.theta_n)<-globalenv()
+		environment(sample.theta_n)<-globalenv()
+		environment(rdirichlet)<-globalenv()
+		environment(Rcgminu)<-globalenv()
+		sfExport("phi", "X", "alpha", "gibbs.idx", "seed", "compute.elbo", "sample.Z.theta_n","sample.theta_n","rdirichlet", "Rcgminu", "tmp.dir")
 		environment(cpu.fun) <- globalenv()
 		gibbs.list <- sfLapply( 1:nrow(X), cpu.fun)
 		sfStop()
@@ -279,6 +288,7 @@ run.gibbs.refPhi.ini <- function(gibbsSampler.obj,
 		#single thread
 		cpu.fun <- function(n) {
 				if(!is.null(seed)) set.seed(seed)
+				require("BayesPrism")
 				cat(n," ")
 				sample.Z.theta_n (X_n = X[n,], phi = phi, alpha = alpha, 
 								  gibbs.idx = gibbs.idx, compute.elbo = compute.elbo)
@@ -326,6 +336,12 @@ run.gibbs.refPhi.final <- function(gibbsSampler.obj,
 		
 		cpu.fun <- function(n) {
 			if(!is.null(seed)) set.seed(seed)
+			environment(sample.Z.theta_n)<-globalenv()
+			environment(sample.theta_n)<-globalenv()
+			environment(rdirichlet)<-globalenv()
+			environment(Rcgminu)<-globalenv()
+			sfExport("phi", "X", "alpha", "gibbs.idx", "seed", "compute.elbo", "sample.Z.theta_n","sample.theta_n","rdirichlet", "Rcgminu")
+			require("BayesPrism")
 			#load nth mixture from disk
 			file.name.X_n <- paste(tmp.dir, "/mixture_",n,".rdata",sep="")
 			load(file.name.X_n)
@@ -346,6 +362,7 @@ run.gibbs.refPhi.final <- function(gibbsSampler.obj,
 		#single thread
 		cpu.fun <- function(n) {
 			if(!is.null(seed)) set.seed(seed)
+			require("BayesPrism")
 			cat(n," ")
 			sample.theta_n (X_n = X[n,], phi = phi, alpha = alpha, gibbs.idx = gibbs.idx)
 		}
