@@ -78,10 +78,18 @@ optimize.psi<-function(phi,
 	Rcgminu <- BayesPrism::: Rcgminu
 	log.posterior.gamma.grad <- BayesPrism::: log.posterior.gamma.grad
 	log.posterior.gamma <- BayesPrism::: log.posterior.gamma
-	sfExport("phi", "Z_gt", "Z_t", "prior.num", "opt.control", 
-			 "Rcgminu", "log.posterior.gamma.grad", "log.posterior.gamma")
+#	sfExport("phi", "Z_gt", "Z_t", "prior.num", "opt.control", 
+#			 "Rcgminu", "log.posterior.gamma.grad", "log.posterior.gamma")
+	environment(Rcgminu)<-globalenv()
+	environment(log.posterior.gamma.grad)<-globalenv()
+	environment(log.posterior.gamma)<-globalenv()
+	environment(logsumexp)<-globalenv()
+	environment(transform.phi_t)<-globalenv()
+	environment(transform.phi)<-globalenv()
+	sfExport("phi", "Z_gt", "Z_t", "prior.num", "opt.control", "Rcgminu", "log.posterior.gamma.grad","log.posterior.gamma","logsumexp", "transform.phi_t","transform.phi")
 
-	environment(cpu.fun) <- globalenv()
+	#environment(cpu.fun) <- globalenv()
+#	environment(cpu.fun) <- globalenv()
 	opt.res <- sfLapply( 1:nrow(phi), cpu.fun)
 	sfStop()
 	gc()
